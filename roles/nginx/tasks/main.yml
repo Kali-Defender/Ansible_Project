@@ -1,0 +1,28 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for nginx
+- name: 安装Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: 启动Nginx服务
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: 渲染 nginx 配置
+  ansible.builtin.template:
+    src: nginx.j2
+    dest: /etc/nginx/sites-available/default
+  notify: 重启 nginx
+
+- name: 部署应用首页
+  ansible.builtin.copy:
+    src: index.html
+    dest: /var/www/html/index.nginx-debian.html
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  notify: 重启 nginx

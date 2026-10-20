@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: MIT-0
+---
+# defaults file for init
+# apt 源镜像地址（可按需覆盖）
+apt_mirror: http://deb.debian.org/debian
+apt_mirror_security: http://security.debian.org/debian-security

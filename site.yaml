@@ -1,0 +1,7 @@
+---
+- name: 批量安装Nginx
+  hosts: web
+  become: true
+  roles:
+    - nginx   
+...

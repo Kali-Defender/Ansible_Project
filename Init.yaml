@@ -1,0 +1,7 @@
+---
+- name: 基础配置 - 修改主机名
+  hosts: web #对web组的所有主机执行
+  become: true #sudo提权
+  roles:
+    - init # 见 roles/init：主机名、ops用户、sudo、SSH密钥、apt源、SSH加固
+...

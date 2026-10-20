@@ -1,0 +1,6 @@
+{{ ansible_managed | comment }}
+# 由 Ansible roles/init 自动生成，请勿手动编辑
+
+deb {{ apt_mirror }} {{ ansible_distribution_release }} main contrib non-free non-free-firmware
+deb {{ apt_mirror }} {{ ansible_distribution_release }}-updates main contrib non-free non-free-firmware
+deb {{ apt_mirror_security }} {{ ansible_distribution_release }}-security main contrib non-free non-free-firmware

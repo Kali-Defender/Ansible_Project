@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: MIT-0
+---
+# handlers file for init
+- name: 更新apt缓存
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: 重启ssh
+  ansible.builtin.service:
+    name: ssh
+    state: restarted

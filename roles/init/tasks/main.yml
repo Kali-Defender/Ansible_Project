@@ -1,0 +1,74 @@
+# SPDX-License-Identifier: MIT-0
+---
+# tasks file for init
+- name: 设置主机名为inventory里的名字
+  ansible.builtin.hostname: # 设置主机名的模块
+    name: "{{ inventory_hostname }}" # 将固定值替换为inventory里的主机名
+  # Linux命令：hostnamectl set-hostname hostname
+
+- name: 新增用户ops
+  ansible.builtin.user:
+    name: ops
+    shell: /bin/bash # 指定用户的shell
+    state: present # 保证用户状态是存在的
+    create_home: true # 创建家目录
+  # Linux命令：useradd -m -s /bin/bash ops
+
+- name: 给ops免密sudo
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/ops-nopasswd
+    content: "ops ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "visudo -cf %s" # 关键安全点。Ansible 会先把内容写到临时文件，用 visudo -cf 临时文件 检查语法，只有通过才替换正式文件。
+  # Linux命令：
+  #  echo "ops ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ops-nopasswd
+  #  chown root:root /etc/sudoers.d/ops-nopasswd
+  #  chmod 0440 /etc/sudoers.d/ops-nopasswd
+  #  visudo -cf /etc/sudoers.d/ops-nopasswd
+
+- name: 给ops用户加SSH密钥
+  ansible.posix.authorized_key:
+    user: ops
+    key: "{{ lookup('file','~/.ssh/id_rsa.pub') }}"
+    state: present
+  # mkdir -p /home/ops/.ssh
+  # chmod 700 /home/ops/.ssh
+  # chown ops:ops /home/ops/.ssh
+  # cat ~/.ssh/id_rsa.pub >> /home/ops/.ssh/authorized_keys
+  # chmod 600 /home/ops/.ssh/authorized_keys
+  # chown ops:ops /home/ops/.ssh/authorized_keys
+
+- name: 配置Debian apt源
+  ansible.builtin.template:
+    src: sources.list.j2
+    dest: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+  notify: 更新apt缓存
+  # cp /etc/apt/sources.list /etc/apt/sources.list.bak
+  # 编辑 /etc/apt/sources.list
+  # chown root:root /etc/apt/sources.list
+  # chmod 0644 /etc/apt/sources.list
+  # apt-get update
+
+- name: 禁止root密码登录
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin prohibit-password'
+  notify: 重启ssh
+  # sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+  # systemctl restart ssh
+
+- name: 禁止密码认证
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+  notify: 重启ssh
+  # sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+  # systemctl restart ssh

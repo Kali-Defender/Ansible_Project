@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: your name
+  description: 新机器基础配置角色：主机名、ops用户、sudo、SSH密钥、apt源、SSH加固
+  license: MIT
+
+  min_ansible_version: "2.1"
+
+  platforms:
+    - name: Debian
+      versions:
+        - all
+
+  galaxy_tags: []
+
+dependencies: []
